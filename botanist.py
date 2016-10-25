@@ -274,6 +274,8 @@ class Bot(ircbot.SingleServerIRCBot):
 		if "test" in message:
 			string = remove_accents(message.lower())
 			serv.privmsg(self.chan, string)
+		if "!github" == message:
+			serv.privmsg(self.chan, "https://github.com/bemug/BOTanist")
 
 
 		#voicefaible!
