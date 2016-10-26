@@ -292,7 +292,7 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "COIN COIN MODAFUCKAH")
 
 		if message.lower().rstrip().endswith('age'):
-			serv.privmsg(self.chan, "MAIS " + message.rstrip().split()[-1] + ", CA RIME AVEC FROMAAAAGE" )
+			serv.privmsg(self.chan, "MAIS " + message.rstrip().split()[-1].upper() + ", CA RIME AVEC FROMAAAAGE" )
 
 		#voicefaible!
 		if "!play" == message:
