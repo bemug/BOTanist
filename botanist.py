@@ -271,9 +271,6 @@ class Bot(ircbot.SingleServerIRCBot):
 				serv.privmsg(self.chan, "_"+i+": "+str(self.jokes[i])+" pokétunes".decode("utf8"))
 		if "!suicide" == message:
 			serv.privmsg(self.chan, "Ô monde cruel!")
-		if "test" in message:
-			string = remove_accents(message.lower())
-			serv.privmsg(self.chan, string)
 		if "!github" == message:
 			serv.privmsg(self.chan, "https://github.com/bemug/BOTanist")
 
