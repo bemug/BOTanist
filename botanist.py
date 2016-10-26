@@ -288,6 +288,9 @@ class Bot(ircbot.SingleServerIRCBot):
 		if "!github" == message:
 			serv.privmsg(self.chan, "https://github.com/bemug/BOTanist")
 
+        if "canard" in message.lower():
+			serv.privmsg(self.chan, "COIN COIN MODAFUCKAH")
+
 
 		#voicefaible!
 		if "!play" == message:
