@@ -15,6 +15,15 @@ def remove_accents(input_str):
 	only_ascii = nfkd_form.encode('ASCII', 'ignore')
 	return only_ascii
 
+def is_last_voyel(voyel, input_str):
+	for cur_char in reversed(input_str):
+		if cur_char in ('a', 'e', 'i', 'o', 'u', 'y'):
+			if cur_char == voyel:
+				return True
+			else:
+				return False
+	return False
+
 
 class Bot(ircbot.SingleServerIRCBot):
 	chan = "#contreloutre"
@@ -308,8 +317,9 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "me too thanks")
 		if random.random() < 0.005:
 			serv.privmsg(self.chan, "go startup?")
-		if random.random() < 0.005:
-			serv.privmsg(self.chan, "Mom's Spaghetti")
+		if random.random() < 0.1:
+			if is_last_voyel('i', message) or is_last_voyel('y', message):
+				serv.privmsg(self.chan, "Mom's Spaghetti")
 
 
 		if message == self.last_message:
