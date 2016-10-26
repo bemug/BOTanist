@@ -19,6 +19,7 @@ def remove_accents(input_str):
 class Bot(ircbot.SingleServerIRCBot):
 	chan = "#contreloutre"
 	name = "BOTanist"
+	money = "pokétunes".decode("utf8")
 	cpt_last_message = 0
 	last_message = ""
 	last_user = ""
@@ -261,16 +262,18 @@ class Bot(ircbot.SingleServerIRCBot):
 						self.jokes[target] += 1
 					else:
 						self.jokes[target] = 1
-					serv.privmsg(self.chan, "Good jk _"+ target +" i rate 8/8, "+str(self.jokes[target])+" pokétunes".decode("utf8"))
+					serv.privmsg(self.chan, "Good jk _"+ target +" i rate 8/8, "+str(self.jokes[target])+" "+self.money)
 					with open('jokes.txt', 'w') as f:
 						pickle.dump(self.jokes, f, 0)
 				else:
 					serv.privmsg(self.chan, "Je le connais pas "+ target)
 		if "!jokes" == message or "!joke" == message:
 			for i in self.jokes:
-				serv.privmsg(self.chan, "_"+i+": "+str(self.jokes[i])+" pokétunes".decode("utf8"))
+				serv.privmsg(self.chan, "_"+i+": "+str(self.jokes[i])+" "+self.money)
 		if "!suicide" == message:
 			serv.privmsg(self.chan, "Ô monde cruel!")
+		if message.startswith("!money "):
+			self.money = message[7:30]
 		if "!github" == message:
 			serv.privmsg(self.chan, "https://github.com/bemug/BOTanist")
 
