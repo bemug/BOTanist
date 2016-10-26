@@ -245,6 +245,8 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "A quoi le sandwich?!")
 		if "à la fraise".decode("utf8") in message.lower() or "a la fraise" in message.lower():
 			serv.privmsg(self.chan, "Ah..")
+		if "feu".decode("utf8") in message.lower():
+			serv.privmsg(self.chan, "CHUI CHAUD CHUI CHAUUUUUUUUD")
 		if "!stat" == message.lower():
 			for i in self.stats:
 				stat = '%.2f' % (float(self.stats[i]) / float(self.total_msg) * 100.0)
