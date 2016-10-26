@@ -236,8 +236,11 @@ class Bot(ircbot.SingleServerIRCBot):
 		if "!rt" == message or "!respecttables" == message:
 			serv.privmsg(self.chan, "┬─┬ノ(ಠ_ಠノ)".decode("utf8"))
 		if "popopo" in message.lower() or "oooo" in message.lower():
-			serv.privmsg(self.chan, "https://goo.gl/QZVh3H")
-			#http://i.imgur.com/WxQI4UI.jpg
+			if random.random() < 0.5:
+				serv.privmsg(self.chan, "https://goo.gl/QZVh3H")
+				#http://i.imgur.com/WxQI4UI.jpg
+			else:
+				serv.privmsg(self.chan, "http://i.imgur.com/VGR9WNA.gifv")
 		if "sandwich" in message.lower():
 			serv.privmsg(self.chan, "A quoi le sandwich?!")
 		if "à la fraise".decode("utf8") in message.lower() or "a la fraise" in message.lower():
