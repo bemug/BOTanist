@@ -328,7 +328,7 @@ class Bot(ircbot.SingleServerIRCBot):
 				
 		#join rand game		
 		if "!rand" == message:
-			if !rand_game_is_on:
+			if not rand_game_is_on:
 				serv.privmsg(self.chan, "En fait, s'tu veux, la y'a genre ... aucune partie en cours..., utilise !rand <bet> pour lancer une partie !")
 			else:
 				print "RandGameJoin "+user
