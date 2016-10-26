@@ -48,7 +48,39 @@ class Bot(ircbot.SingleServerIRCBot):
 	vf_rq_time = 0
 	VF_RQ_MAX = 3
 	VF_RQ_TIMELAPSE = 5
-
+	rand_game_is_on = False
+	rand_game_bet = 1
+	rand_game_players = []
+	
+	def create_rand_game(self, user, args, serv):
+		try: 
+			rand_game_bet = int(args)
+			if self.jokes[user] < self.rand_game_bet:
+				serv.privmsg(self.chan, "Lol tu es bien trop pauvre pour lancer une partie avec une mise si grosse "+user+" (pas du tout ctb jajaja)")
+			else:
+				self.rand_game_is_on = True
+				self.rand_game_players = []
+				self.rand_game_players.append(user)
+				Timer(60, self.play_rand_game, (serv,)).start()
+				serv.privmsg(self.chan, "Faites vos jeux ! La mise est a "+self.rand_game_bet+", '!rand' pour jouer ("+", ".join(self.users)+"), 60 secondes avant le tirage.")
+		except ValueError:
+			rand_game_bet = 1
+			serv.privmsg(self.chan, "C'est pas un nombre ca: "+args+" ... petit con va !")
+			
+	def join_rand_game(self, user, serv):
+		if user not in self.rand_game_players:
+			if self.jokes[user] < self.rand_game_bet:
+				serv.privmsg(self.chan, "Lol tu es bien trop pauvre pour te permettre de jouer avec nous "+user)
+			else:
+				self.rand_game_players.append(user)
+				serv.privmsg(self.chan, user+" rejoins la partie ! Lui au moins il a des ballz.")
+		else:
+			serv.privmsg(self.chan, ("T'es déjà dans la liste des joueurs "+user).decode("utf8"))
+	
+	def play_rand_game(self, serv):
+		serv.privmsg(self.chan, "LOL vous avez vraiment cru que j'avais eu le temps de coder le jeu en entier... Retournez bosser bande de merde")
+		self.rand_game_is_on = False
+			
 	def start_vf(self, serv):
 		if len(self.players) > 1:
 			serv.privmsg(self.chan, "Debut de la partie! ("+", ".join(self.players)+")")
@@ -309,6 +341,23 @@ class Bot(ircbot.SingleServerIRCBot):
 				Timer(60, self.start_vf, (serv,)).start()
 				serv.privmsg(self.chan, "Nouvelle partie! '!play' pour jouer ("+", ".join(self.users)+").")
 				self.add_player(user, serv)
+				
+		#join rand game		
+		if "!rand" == message:
+			if not self.rand_game_is_on:
+				serv.privmsg(self.chan, "En fait, s'tu veux, la y'a genre ... aucune partie en cours..., utilise !rand <bet> pour lancer une partie !")
+			else:
+				print "RandGameJoin "+user
+				self.join_rand_game(user,serv)
+		
+		#create rand game
+		if message.startswith("!rand "):
+			if self.rand_game_is_on:
+				serv.privmsg(self.chan, "Il y'a deja une partie en cours, peux-tu patienter un peu sale merde ??? Ou bien si tu veux la rejoindre, c'est juste !rand")
+			else:
+				print "RandGameCreate "+user
+				args = message[6:100]
+				self.create_rand_game(user,args,serv)
 
 		if "!stopvoicefaible" == message:
 			print "Stop Vociefaible "+user
