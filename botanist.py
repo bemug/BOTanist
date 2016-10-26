@@ -288,10 +288,10 @@ class Bot(ircbot.SingleServerIRCBot):
 		if "!github" == message:
 			serv.privmsg(self.chan, "https://github.com/bemug/BOTanist")
 
-        if "canard" in message.lower():
+		if "canard" in message.lower():
 			serv.privmsg(self.chan, "COIN COIN MODAFUCKAH")
 
-        if message.lower().rstrip().endswith('age'):
+		if message.lower().rstrip().endswith('age'):
 			serv.privmsg(self.chan, "MAIS " + message.rstrip().split()[-1] + ", CA RIME AVEC FROMAAAAGE" )
 
 		#voicefaible!
