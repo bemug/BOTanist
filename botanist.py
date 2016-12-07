@@ -24,6 +24,11 @@ def is_last_voyel(voyel, input_str):
 				return False
 	return False
 
+def is_a_voyel(input_str):
+	if input_str[-1:] in ('a', 'e', 'i', 'o', 'u', 'y'):
+		return True
+	return False
+
 
 class Bot(ircbot.SingleServerIRCBot):
 	chan = "#contreloutre"
@@ -45,13 +50,16 @@ class Bot(ircbot.SingleServerIRCBot):
 	vf_question = ""
 	vf_winner = ""
 	vf_rq_cpt = 0
+	vf_rq_need = 0
 	vf_rq_time = 0
-	VF_RQ_MAX = 3
 	VF_RQ_TIMELAPSE = 5
+	items = {'slap': 1, 'kick': 10}
+	users_items = {}
 
 	def start_vf(self, serv):
 		if len(self.players) > 1:
 			serv.privmsg(self.chan, "Debut de la partie! ("+", ".join(self.players)+")")
+			self.vf_rq_need = len(self.players)
 			self.vf_w_mode = False
 			self.vf_q_mode = True
 			time.sleep(2)
@@ -143,8 +151,8 @@ class Bot(ircbot.SingleServerIRCBot):
 			elif "!rq" == message:
 				if self.vf_rq_time + self.VF_RQ_TIMELAPSE < time.time():
 					self.vf_rq_cpt+=1
-					if self.vf_rq_cpt < self.VF_RQ_MAX:
-						serv.privmsg(self.chan, str(self.vf_rq_cpt)+"/"+str(self.VF_RQ_MAX)+" rq")
+					if self.vf_rq_cpt < self.vf_rq_need:
+						serv.privmsg(self.chan, str(self.vf_rq_cpt)+"/"+str(self.vf_rq_need)+" rq")
 						self.vf_rq_time = time.time()
 					else:
 						self.vf_rq_cpt = 0
@@ -164,10 +172,13 @@ class Bot(ircbot.SingleServerIRCBot):
 						self.players.remove(message)
 						if len(self.players) == 1:
 							self.vf_q_mode = False
-							serv.privmsg(self.chan, "GG "+self.players[0])
+							serv.privmsg(self.chan, "GG "+self.players[0]+". Voila tes " + str(self.vf_rq_need-1) + " " + self.money+".")
+							self.jokes[self.players[0]] = self.jokes[self.players[0]] + self.vf_rq_need-1
+							with open('jokes.txt', 'w') as f:
+								pickle.dump(self.jokes, f, 0)
 							serv.mode(self.chan, "-v "+self.players[0])
-							serv.privmsg(self.chan, "Partie terminée :)".decode("utf8"))
 							self.players = []
+							serv.privmsg(self.chan, "Partie terminée :)".decode("utf8"))
 						else:
 							self.vf_q_mode = True
 							time.sleep(2)
@@ -245,6 +256,10 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "┻━┻ ︵╰ (°□°╰)".decode("utf8"))
 		if "!rt" == message or "!respecttables" == message:
 			serv.privmsg(self.chan, "┬─┬ノ(ಠ_ಠノ)".decode("utf8"))
+		if message.startswith("!lf") or message.startswith("!lennyface"):
+			serv.privmsg(self.chan, "( ͡° ͜ʖ ͡° )".decode("utf8"))
+		if message.startswith("!sh") or message.startswith("!sf") or message.startswith("!shrug"):
+			serv.privmsg(self.chan, "¯\_(ツ)_/¯".decode("utf8"))
 		if "popopo" in message.lower() or "oooo" in message.lower():
 			if random.random() < 0.5:
 				serv.privmsg(self.chan, "https://goo.gl/QZVh3H")
@@ -281,21 +296,52 @@ class Bot(ircbot.SingleServerIRCBot):
 						pickle.dump(self.jokes, f, 0)
 				else:
 					serv.privmsg(self.chan, "Je le connais pas "+ target)
-		if "!jokes" == message or "!joke" == message:
+		if "!money" == message :
+			serv.privmsg(self.chan, user+": "+str(self.jokes[user])+" "+self.money)
+		if "!allmoney" == message or "!moneyall" == message :
 			for i in self.jokes:
 				serv.privmsg(self.chan, "_"+i+": "+str(self.jokes[i])+" "+self.money)
 		if "!suicide" == message:
 			serv.privmsg(self.chan, "Ô monde cruel!")
 		if message.startswith("!money "):
-			self.money = message[7:30]
+			self.money = message[7:30].decode("utf8")
+			serv.privmsg(self.chan, "Changement de monnaie, On paie en "+self.money+" maintenant.")
 		if "!github" == message:
 			serv.privmsg(self.chan, "https://github.com/bemug/BOTanist")
 
 		if "canard" in message.lower():
 			serv.privmsg(self.chan, "COIN COIN MODAFUCKAH")
 
+		if "otter" in message.lower() or "loutre" in message.lower():
+			serv.privmsg(self.chan, "YOU OTTERFUCKER https://goo.gl/WYdiop")
+
+
 		if message.lower().rstrip().endswith('age'):
-			serv.privmsg(self.chan, "MAIS " + message.rstrip().split()[-1].upper() + ", CA RIME AVEC FROMAAAAGE" )
+			if random.random() < 0.5:
+				serv.privmsg(self.chan, "MAIS " + message.rstrip().split()[-1].upper() + ", CA RIME AVEC FROMAAAAGE" )
+
+		#shop
+		if "!shop" == message:
+			serv.privmsg(self.chan, "Bienvenue dans le shop!" )
+			for i in self.items:
+				serv.privmsg(self.chan, "\t"+ i + ": " + str(self.items[i]) + " " + self.money)
+			serv.privmsg(self.chan, "!buy <item> pour acheter. Revenez nous voir bientot!")
+
+		if message.startswith("!buy "):
+			for i in self.items:
+				if message[5:5+len(i)] == i:
+					if (self.jokes[user] > self.items[i]):
+						serv.privmsg(self.chan, "Ca fera " + str(self.items[i]) + " " + self.money + " pour ton " + i)
+						self.jokes[user] = self.jokes[user] - self.items[i]
+						#UGLY AF!
+						if i == 'slap':
+							serv.action(self.chan, "slaps "+message[10:100]) #todo check user lol
+						elif i == 'kick':
+							serv.privmsg(self.chan, "lol tacru")
+						with open('jokes.txt', 'w') as f:
+							pickle.dump(self.jokes, f, 0)
+					else:
+						serv.privmsg(self.chan, "T'as pas assez de " + self.money + " casse toi sale pauvre.")
 
 		#voicefaible!
 		if "!play" == message:
@@ -311,23 +357,23 @@ class Bot(ircbot.SingleServerIRCBot):
 				self.add_player(user, serv)
 
 		if "!stopvoicefaible" == message:
-			print "Stop Vociefaible "+user
-			self.vf_q_mode = False
-			self.vf_n_mode = False
-			self.vf_w_mode = False
-			serv.privmsg(self.chan, "Oh, ok on joue plus alors..")
-			for i in self.users:
-				serv.mode(self.chan, "-v "+i)
-			self.players = []
+			if user == "Zoologist":
+				print "Stop Vociefaible "+user
+				self.vf_q_mode = False
+				self.vf_n_mode = False
+				self.vf_w_mode = False
+				serv.privmsg(self.chan, "Oh, ok on joue plus alors..")
+				for i in self.users:
+					serv.mode(self.chan, "-v "+i)
+				self.players = []
 
 		#Random shit
 		if random.random() < 0.005:
 			serv.privmsg(self.chan, "me too thanks")
 		if random.random() < 0.005:
 			serv.privmsg(self.chan, "go startup?")
-		if random.random() < 0.1:
-			if is_last_voyel('i', message) or is_last_voyel('y', message):
-				serv.privmsg(self.chan, "Mom's Spaghetti")
+		if message.endswith('i') and not is_a_voyel(message[:-1]):
+			serv.privmsg(self.chan, "mom's spaghetti")
 
 
 		if message == self.last_message:
