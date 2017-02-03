@@ -391,7 +391,8 @@ class Bot(ircbot.SingleServerIRCBot):
 		if random.random() < 0.005:
 			serv.privmsg(self.chan, "go startup?")
 		if message.endswith('i') and not is_a_voyel(message[:-1]):
-			serv.privmsg(self.chan, "mom's spaghetti")
+			if random.random() < 0.005:
+				serv.privmsg(self.chan, "mom's spaghetti")
 
 
 		if message == self.last_message:
