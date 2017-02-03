@@ -312,6 +312,24 @@ class Bot(ircbot.SingleServerIRCBot):
 		if "canard" in message.lower():
 			serv.privmsg(self.chan, "COIN COIN MODAFUCKAH")
 
+		if "!racist" == message:
+			serv.privmsg(self.chan, "https://media.giphy.com/media/TziYd1ClxHmiQ/giphy.gif")
+
+		if message.startswith("!youtube ") or message.startswith("!y "):
+			if message.startswith("!y "):
+				query = message[3:100]
+			elif message.startswith("!youtube "):
+				query = message[9:100]
+			print "Youtube request from "+user+" for '"+query+"'"
+			query = query.replace(" ", "+")
+			serv.privmsg(self.chan,"https://www.youtube.com/results?search_query="+query)
+
+		if "chanson?" == message:
+			serv.privmsg(self.chan, "A CHAQUE CHANSON")
+			serv.privmsg(self.chan, "FAUT Y METTRE FAUT Y METTRE")
+			serv.privmsg(self.chan, "A CHAQUE CHANSON")
+			serv.privmsg(self.chan, "FAUT Y METTRE SON CANON")
+
 		if "otter" in message.lower() or "loutre" in message.lower():
 			serv.privmsg(self.chan, "YOU OTTERFUCKER https://goo.gl/WYdiop")
 
