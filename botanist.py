@@ -309,6 +309,10 @@ class Bot(ircbot.SingleServerIRCBot):
 		if "!github" == message:
 			serv.privmsg(self.chan, "https://github.com/bemug/BOTanist")
 
+		if "pirate" in message.lower():
+			serv.privmsg(self.chan, "YOU ARE A PIRATE !")
+			serv.privmsg(self.chan, "http://cristgaming.com/pirate")
+
 		if "canard" in message.lower():
 			serv.privmsg(self.chan, "COIN COIN MODAFUCKAH")
 
