@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
+# coding: utf8
 
 import irclib
 import ircbot
 import random
 import os
 import pickle
+import string
 import time
 import unicodedata
 from threading import Timer
@@ -29,10 +31,23 @@ def is_a_voyel(input_str):
 		return True
 	return False
 
+def get_vowel():
+	a = ""
+	while not is_a_voyel(a.lower()):
+		a = random.choice(string.ascii_uppercase)	# nice code
+	return a
+
+def get_consonant():
+	a = ""
+	while a == "" or is_a_voyel(a.lower()):
+		a = random.choice(string.ascii_uppercase)
+	return a
+
+
 
 class Bot(ircbot.SingleServerIRCBot):
 	chan = "#contreloutre"
-	name = "BOTanist"
+	name = "BOTanist2"
 	money = "pokétunes".decode("utf8")
 	cpt_last_message = 0
 	last_message = ""
@@ -55,6 +70,92 @@ class Bot(ircbot.SingleServerIRCBot):
 	VF_RQ_TIMELAPSE = 5
 	items = {'slap': 1, 'kick': 10}
 	users_items = {}
+	dcdl_mode = 0	# 0: not playing, 1: selection, 2: reflection time, 3: answer time
+	dcdl_dict = open('frdict.txt').read().splitlines()
+	dcdl_tirage = ""
+	dcdl_answers = {}
+	dcdl_points = {}
+
+
+
+	def dcdl_isValidAnswer(self,tirage,ans):
+	    s_tirage = list(tirage)
+	    s_ans = list(ans)
+	    s_tirage.sort()
+	    s_ans.sort()
+	    pos1 = 0
+	    pos2 = 0
+	    while pos2 < len(s_ans) and pos1 < len(s_tirage):
+	      if s_tirage[pos1] == s_ans[pos2]:
+	        pos1 = pos1 + 1		# OK, next letter
+	        pos2 = pos2 + 1
+	      else:
+	        pos1 = pos1 + 1
+	    if pos2 < len(s_ans):
+	        return 1  # == apprends à jouer
+	    # look in dictionary
+	    if ans.lower() in self.dcdl_dict:
+	      return 0 
+	    return 2 # == apprends le francais
+
+	def dcdl_fini(self, serv):
+		serv.privmsg(self.chan, "** Fini! **")
+		winners = {}
+		points = 0
+		for player, ans in self.dcdl_answers.iteritems():
+			res = self.dcdl_isValidAnswer(self.dcdl_tirage, ans.upper())
+			if res == 1:
+				serv.privmsg(self.chan, u"Apprends à jouer, " + player)
+			elif res == 2:
+				if random.random() < 0.9:
+					serv.privmsg(self.chan, "'" + ans + "', ce n'est pas un mot " + player)
+				else:
+					serv.privmsg(self.chan, "Eh non " + player + ", c'est intransitif!")
+			else:
+				if len(ans) > points:
+					winners = [player]
+					points = len(ans)
+				elif len(ans) == points:
+					winners.append(player)
+		serv.privmsg(self.chan, "Gagnant-e-(s): ")
+		for winner in winners:
+			serv.privmsg(self.chan, winner + ", + " + str(points) + " points")
+			if winner in self.dcdl_points:
+				self.dcdl_points[winner] += points
+			else:
+				self.dcdl_points[winner] = points
+		# check for end-of-game
+		final_winner = ""
+		final_winner_points = 40
+		for player, points in self.dcdl_points.iteritems():
+			if points > final_winner_points:
+				final_winner_points = points
+				final_winner = player
+			elif points == final_winner_points and final_winner != "":
+				# woops, two winners, reset
+				final_winner = ""
+		if final_winner != "":
+			serv.privmsg(self.chan, "** Gagnant: " + player + " avec " + str(points) + " points")
+			# reset
+			self.dcdl_tirage = ""
+			self.dcdl_answers = {}
+			self.dcdl_points = {}
+			self.dcdl_mode = 0
+		else:
+			# restart
+			self.dcdl_begin(serv)
+
+	def dcdl_begin(self, serv):
+		self.dcdl_mode = 1
+		self.dcdl_tirage = ""
+		self.dcdl_answers = {}
+		serv.privmsg(self.chan, u"C'est à vous! voyelle ou consonne")
+
+	def dcdl_get_answers(self, serv):
+		serv.privmsg(self.chan, u"** Vos réponses (vous avez 5 secondes): **")
+		self.dcdl_mode = 3
+		Timer(5, self.dcdl_fini, (serv,)).start()
+
 
 	def start_vf(self, serv):
 		if len(self.players) > 1:
@@ -185,6 +286,23 @@ class Bot(ircbot.SingleServerIRCBot):
 							self.say_question(serv)
 					else:
 						serv.privmsg(self.chan, message + " il est pas voice, tocard. Prends en un autre")
+		elif self.dcdl_mode == 0:
+			if message == "!deslettresetdeslettres":
+				self.dcdl_begin(serv)
+
+		elif self.dcdl_mode == 1:	# letter selection
+			if message == "voyelle":
+				self.dcdl_tirage = self.dcdl_tirage + get_vowel()
+				serv.privmsg(self.chan, "** " + self.dcdl_tirage)
+			elif message == "consonne":
+				self.dcdl_tirage = self.dcdl_tirage + get_consonant()
+				serv.privmsg(self.chan, "** " + self.dcdl_tirage)
+			if len(self.dcdl_tirage) == 9:
+				self.dcdl_mode = 2		# time to think!
+				serv.privmsg(self.chan, u"A vous de réfléchir, vous avez 15 secondes. Gardez votre réponse pour vous.")
+				Timer(15, self.dcdl_get_answers, (serv,)).start()
+		elif self.dcdl_mode == 3:	# answer time
+			self.dcdl_answers[user] = message # save answer for user
 
 		if user in self.stats:
 			self.stats[user] += 1
@@ -372,8 +490,8 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "me too thanks")
 		if random.random() < 0.005:
 			serv.privmsg(self.chan, "go startup?")
-		if message.endswith('i') and not is_a_voyel(message[:-1]):
-			serv.privmsg(self.chan, "mom's spaghetti")
+		#if message.endswith('i') and not is_a_voyel(message[:-1]):
+		#	serv.privmsg(self.chan, "mom's spaghetti")
 
 
 		if message == self.last_message:
