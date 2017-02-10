@@ -207,7 +207,7 @@ class Bot(ircbot.SingleServerIRCBot):
 				"bemugbot", "J'aime les loutres et les cornichons")
 	def on_welcome(self, serv, ev):
 		print "Connected!"
-		serv.nick("BOTanist")
+		serv.nick(self.name)
 		print "Joining channel.."
 		serv.join(self.chan)
 	def on_endofnames(self, serv, ev):
