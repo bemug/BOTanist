@@ -54,7 +54,7 @@ class Bot(ircbot.SingleServerIRCBot):
 	vf_rq_need = 0
 	vf_rq_time = 0
 	VF_RQ_TIMELAPSE = 5
-	items = {'slap': 1, 'kick': 10}
+	items = {'slap': 1, 'kick': 50}
 	users_items = {}
 
 	def start_vf(self, serv):
@@ -329,19 +329,20 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "Bienvenue dans le shop!" )
 			for i in self.items:
 				serv.privmsg(self.chan, "\t"+ i + ": " + str(self.items[i]) + " " + self.money)
-			serv.privmsg(self.chan, "!buy <item> pour acheter. Revenez nous voir bientot!")
+			serv.privmsg(self.chan, "!buy <item> <target> pour acheter. Revenez nous voir bientot!")
 
 		if message.startswith("!buy "):
 			for i in self.items:
 				if message[5:5+len(i)] == i:
-					if (self.jokes[user] > self.items[i]):
+					if (self.jokes[user] >= self.items[i]):
 						serv.privmsg(self.chan, "Ca fera " + str(self.items[i]) + " " + self.money + " pour ton " + i)
 						self.jokes[user] = self.jokes[user] - self.items[i]
 						#UGLY AF!
 						if i == 'slap':
 							serv.action(self.chan, "slaps "+message[10:100]) #todo check user lol
 						elif i == 'kick':
-							serv.privmsg(self.chan, "lol tacru")
+							if not self.vf_n_mode and not self.vf_q_mode and not self.vf_w_mode:
+								serv.kick(self.chan, message[10:100], 'Quelqu\'un a payé pour ça'.decode('utf8'))
 						with open('jokes.txt', 'w') as f:
 							pickle.dump(self.jokes, f, 0)
 					else:
