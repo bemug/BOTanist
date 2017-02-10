@@ -268,8 +268,12 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "┬─┬ノ(ಠ_ಠノ)".decode("utf8"))
 		if message.startswith("!lf") or message.startswith("!lennyface"):
 			serv.privmsg(self.chan, "( ͡° ͜ʖ ͡° )".decode("utf8"))
-		if message.startswith("!sh") or message.startswith("!sf") or message.startswith("!shrug"):
+		if message.startswith("!fu"):
+			serv.privmsg(self.chan, "( ° ͜ʖ͡°)╭∩╮".decode("utf8"))
+		if message == "!sh" or message.startswith("!sf") or message.startswith("!shrug"):
 			serv.privmsg(self.chan, "¯\_(ツ)_/¯".decode("utf8"))
+		if message.startswith("!badum"):
+			serv.privmsg(self.chan, "**BADUM TSSS** http://i.imgur.com/BbgL7x3.gif")
 		if "popopo" in message.lower() or "oooo" in message.lower():
 			if random.random() < 0.5:
 				serv.privmsg(self.chan, "https://goo.gl/QZVh3H")
@@ -288,6 +292,8 @@ class Bot(ircbot.SingleServerIRCBot):
 				serv.privmsg(self.chan, "_"+i+": "+stat+"%")
 		if "!slap" == message:
 			serv.action(self.chan, "slaps "+random.choice(self.users))
+		if "!meme" == message:
+			serv.privmsg(self.chan, "https://imgflip.com/memegenerator")
 		if message.startswith("!n ") or message.startswith("!nice "):
 			if message.startswith("!n "):
 				target = message[3:100]
