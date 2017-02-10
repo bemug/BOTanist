@@ -71,7 +71,7 @@ class Bot(ircbot.SingleServerIRCBot):
 	VF_RQ_TIMELAPSE = 5
 	items = {'slap': 1, 'kick': 50}
 	users_items = {}
-  forbiden_words = []
+  	forbiden_words = []
 	dcdl_mode = 0	# 0: not playing, 1: selection, 2: reflection time, 3: answer time
 	dcdl_dict = open('frdict.txt').read().splitlines()
 	dcdl_tirage = ""
