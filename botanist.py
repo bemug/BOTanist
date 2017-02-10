@@ -60,6 +60,7 @@ class Bot(ircbot.SingleServerIRCBot):
 
 	def start_vf(self, serv):
 		if len(self.players) > 1:
+			serv.privmsg(self.chan, "!togglecollect")
 			serv.privmsg(self.chan, "Debut de la partie! ("+", ".join(self.players)+")")
 			self.vf_rq_need = len(self.players)
 			self.vf_w_mode = False
@@ -188,6 +189,7 @@ class Bot(ircbot.SingleServerIRCBot):
 							self.players = []
 							self.question = ""
 							serv.privmsg(self.chan, "Partie terminée :)".decode("utf8"))
+							serv.privmsg(self.chan, "!togglecollect")
 						else:
 							self.vf_q_mode = True
 							time.sleep(2)
