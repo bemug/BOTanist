@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
+# coding: utf8
 
 import irclib
 import ircbot
 import random
 import os
 import pickle
+import string
 import time
 import unicodedata
 from threading import Timer
@@ -29,10 +31,24 @@ def is_a_voyel(input_str):
 		return True
 	return False
 
+def get_vowel():
+	a = ""
+	while not is_a_voyel(a.lower()):
+		a = random.choice(string.ascii_uppercase)	# nice code
+	return a
+
+def get_consonant():
+	a = ""
+	while a == "" or is_a_voyel(a.lower()):
+		a = random.choice(string.ascii_uppercase)
+	return a
+
+
 
 class Bot(ircbot.SingleServerIRCBot):
 	chan = "#contreloutre"
 	name = "BOTanist"
+	master = "Zoologist"
 	money = "pokétunes".decode("utf8")
 	cpt_last_message = 0
 	last_message = ""
@@ -53,16 +69,103 @@ class Bot(ircbot.SingleServerIRCBot):
 	vf_rq_need = 0
 	vf_rq_time = 0
 	VF_RQ_TIMELAPSE = 5
-	items = {'slap': 1, 'kick': 10}
+	items = {'slap': 1, 'kick': 50}
 	users_items = {}
+  forbiden_words = []
+	dcdl_mode = 0	# 0: not playing, 1: selection, 2: reflection time, 3: answer time
+	dcdl_dict = open('frdict.txt').read().splitlines()
+	dcdl_tirage = ""
+	dcdl_answers = {}
+	dcdl_points = {}
+
+
+
+	def dcdl_isValidAnswer(self,tirage,ans):
+	    s_tirage = list(tirage)
+	    s_ans = list(ans)
+	    s_tirage.sort()
+	    s_ans.sort()
+	    pos1 = 0
+	    pos2 = 0
+	    while pos2 < len(s_ans) and pos1 < len(s_tirage):
+	      if s_tirage[pos1] == s_ans[pos2]:
+	        pos1 = pos1 + 1		# OK, next letter
+	        pos2 = pos2 + 1
+	      else:
+	        pos1 = pos1 + 1
+	    if pos2 < len(s_ans):
+	        return 1  # == apprends à jouer
+	    # look in dictionary
+	    if ans.lower() in self.dcdl_dict:
+	      return 0 
+	    return 2 # == apprends le francais
+
+	def dcdl_fini(self, serv):
+		serv.privmsg(self.chan, "** Fini! **")
+		winners = {}
+		points = 0
+		for player, ans in self.dcdl_answers.iteritems():
+			res = self.dcdl_isValidAnswer(self.dcdl_tirage, ans.upper())
+			if res == 1:
+				serv.privmsg(self.chan, u"Apprends à jouer, " + player)
+			elif res == 2:
+				if random.random() < 0.9:
+					serv.privmsg(self.chan, "'" + ans + "', ce n'est pas un mot " + player)
+				else:
+					serv.privmsg(self.chan, "Eh non " + player + ", c'est intransitif!")
+			else:
+				if len(ans) > points:
+					winners = [player]
+					points = len(ans)
+				elif len(ans) == points:
+					winners.append(player)
+		serv.privmsg(self.chan, "Gagnant-e-(s): ")
+		for winner in winners:
+			serv.privmsg(self.chan, winner + ", + " + str(points) + " points")
+			if winner in self.dcdl_points:
+				self.dcdl_points[winner] += points
+			else:
+				self.dcdl_points[winner] = points
+		# check for end-of-game
+		final_winner = ""
+		final_winner_points = 40
+		for player, points in self.dcdl_points.iteritems():
+			if points > final_winner_points:
+				final_winner_points = points
+				final_winner = player
+			elif points == final_winner_points and final_winner != "":
+				# woops, two winners, reset
+				final_winner = ""
+		if final_winner != "":
+			serv.privmsg(self.chan, "** Gagnant: " + player + " avec " + str(points) + " points")
+			# reset
+			self.dcdl_tirage = ""
+			self.dcdl_answers = {}
+			self.dcdl_points = {}
+			self.dcdl_mode = 0
+		else:
+			# restart
+			self.dcdl_begin(serv)
+
+	def dcdl_begin(self, serv):
+		self.dcdl_mode = 1
+		self.dcdl_tirage = ""
+		self.dcdl_answers = {}
+		serv.privmsg(self.chan, u"C'est à vous! voyelle ou consonne")
+
+	def dcdl_get_answers(self, serv):
+		serv.privmsg(self.chan, u"** Vos réponses (vous avez 5 secondes): **")
+		self.dcdl_mode = 3
+		Timer(5, self.dcdl_fini, (serv,)).start()
 
 	def start_vf(self, serv):
 		if len(self.players) > 1:
+			serv.privmsg(self.chan, "!togglecollect")
 			serv.privmsg(self.chan, "Debut de la partie! ("+", ".join(self.players)+")")
 			self.vf_rq_need = len(self.players)
 			self.vf_w_mode = False
-			self.vf_q_mode = True
 			time.sleep(2)
+			self.vf_q_mode = True
 			self.say_question(serv)
 		elif len(self.players) == 1:
 			serv.privmsg(self.chan, "Lol y a personne pour jouer avec toi "+self.players[0]+".")
@@ -131,6 +234,12 @@ class Bot(ircbot.SingleServerIRCBot):
 		#print str(self.vf_w_mode) + str(self.vf_q_mode) + str(self.vf_n_mode)
 		message = ev.arguments()[0].decode('utf8')
 		user = irclib.nm_to_n(ev.source())
+		
+		#Check that you can say that
+		for i, word in enumerate(self.forbiden_words):
+			if word in message.lower():
+				print "Kick "+user+" for "+word
+				serv.kick(self.chan, user, 'Ne mentionne pas ce mot sur ce chan pauvre fou')
 
 		if self.vf_q_mode:
 			if remove_accents(message.lower()) == remove_accents(self.vf_answer.lower()):
@@ -178,13 +287,32 @@ class Bot(ircbot.SingleServerIRCBot):
 								pickle.dump(self.jokes, f, 0)
 							serv.mode(self.chan, "-v "+self.players[0])
 							self.players = []
+							self.question = ""
 							serv.privmsg(self.chan, "Partie terminée :)".decode("utf8"))
+							serv.privmsg(self.chan, "!togglecollect")
 						else:
 							self.vf_q_mode = True
 							time.sleep(2)
 							self.say_question(serv)
 					else:
 						serv.privmsg(self.chan, message + " il est pas voice, tocard. Prends en un autre")
+		elif self.dcdl_mode == 0:
+			if message == "!deslettresetdeslettres":
+				self.dcdl_begin(serv)
+
+		elif self.dcdl_mode == 1:	# letter selection
+			if message == "voyelle":
+				self.dcdl_tirage = self.dcdl_tirage + get_vowel()
+				serv.privmsg(self.chan, "** " + self.dcdl_tirage)
+			elif message == "consonne":
+				self.dcdl_tirage = self.dcdl_tirage + get_consonant()
+				serv.privmsg(self.chan, "** " + self.dcdl_tirage)
+			if len(self.dcdl_tirage) == 9:
+				self.dcdl_mode = 2		# time to think!
+				serv.privmsg(self.chan, u"A vous de réfléchir, vous avez 15 secondes. Gardez votre réponse pour vous.")
+				Timer(15, self.dcdl_get_answers, (serv,)).start()
+		elif self.dcdl_mode == 3:	# answer time
+			self.dcdl_answers[user] = message # save answer for user
 
 		if user in self.stats:
 			self.stats[user] += 1
@@ -207,6 +335,7 @@ class Bot(ircbot.SingleServerIRCBot):
 		if "!song" == message or "song?" == message:
 			print "Song asked by "+user
 			serv.privmsg(self.chan, "Darude - Sandstorm")
+			serv.privmsg(self.chan, "https://goo.gl/uGvNCD")
 		if self.name in message or "bot" in message:
 			if "ty "+self.name in message:
 				print "np "+user
@@ -258,8 +387,12 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "┬─┬ノ(ಠ_ಠノ)".decode("utf8"))
 		if message.startswith("!lf") or message.startswith("!lennyface"):
 			serv.privmsg(self.chan, "( ͡° ͜ʖ ͡° )".decode("utf8"))
-		if message.startswith("!sh") or message.startswith("!sf") or message.startswith("!shrug"):
+		if message.startswith("!fu"):
+			serv.privmsg(self.chan, "( ° ͜ʖ͡°)╭∩╮".decode("utf8"))
+		if message == "!sh" or message.startswith("!sf") or message.startswith("!shrug"):
 			serv.privmsg(self.chan, "¯\_(ツ)_/¯".decode("utf8"))
+		if message.startswith("!badum"):
+			serv.privmsg(self.chan, "**BADUM TSSS** http://i.imgur.com/BbgL7x3.gif")
 		if "popopo" in message.lower() or "oooo" in message.lower():
 			if random.random() < 0.5:
 				serv.privmsg(self.chan, "https://goo.gl/QZVh3H")
@@ -278,6 +411,8 @@ class Bot(ircbot.SingleServerIRCBot):
 				serv.privmsg(self.chan, "_"+i+": "+stat+"%")
 		if "!slap" == message:
 			serv.action(self.chan, "slaps "+random.choice(self.users))
+		if "!meme" == message:
+			serv.privmsg(self.chan, "https://imgflip.com/memegenerator")
 		if message.startswith("!n ") or message.startswith("!nice "):
 			if message.startswith("!n "):
 				target = message[3:100]
@@ -302,9 +437,12 @@ class Bot(ircbot.SingleServerIRCBot):
 			for i in self.jokes:
 				serv.privmsg(self.chan, "_"+i+": "+str(self.jokes[i])+" "+self.money)
 		if "!suicide" == message:
-			serv.privmsg(self.chan, "Ô monde cruel!")
+			if user == self.master:
+				serv.privmsg(self.chan, "Ô monde cruel!")
+			else:
+				serv.privmsg(self.chan, "Je n'écoute que mon maitre, sale péon".decode("utf8"))
 		if message.startswith("!money "):
-			self.money = message[7:30].decode("utf8")
+			self.money = message[7:30]
 			serv.privmsg(self.chan, "Changement de monnaie, On paie en "+self.money+" maintenant.")
 		if "!github" == message:
 			serv.privmsg(self.chan, "https://github.com/bemug/BOTanist")
@@ -347,19 +485,20 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "Bienvenue dans le shop!" )
 			for i in self.items:
 				serv.privmsg(self.chan, "\t"+ i + ": " + str(self.items[i]) + " " + self.money)
-			serv.privmsg(self.chan, "!buy <item> pour acheter. Revenez nous voir bientot!")
+			serv.privmsg(self.chan, "!buy <item> <target> pour acheter. Revenez nous voir bientot!")
 
 		if message.startswith("!buy "):
 			for i in self.items:
 				if message[5:5+len(i)] == i:
-					if (self.jokes[user] > self.items[i]):
+					if (self.jokes[user] >= self.items[i]):
 						serv.privmsg(self.chan, "Ca fera " + str(self.items[i]) + " " + self.money + " pour ton " + i)
 						self.jokes[user] = self.jokes[user] - self.items[i]
 						#UGLY AF!
 						if i == 'slap':
 							serv.action(self.chan, "slaps "+message[10:100]) #todo check user lol
 						elif i == 'kick':
-							serv.privmsg(self.chan, "lol tacru")
+							if not self.vf_n_mode and not self.vf_q_mode and not self.vf_w_mode:
+								serv.kick(self.chan, message[10:100], 'Quelqu\'un a payé pour ça'.decode('utf8'))
 						with open('jokes.txt', 'w') as f:
 							pickle.dump(self.jokes, f, 0)
 					else:
@@ -394,10 +533,10 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "me too thanks")
 		if random.random() < 0.005:
 			serv.privmsg(self.chan, "go startup?")
+      
 		if message.endswith('i') and not is_a_voyel(message[:-1]):
 			if random.random() < 0.005:
 				serv.privmsg(self.chan, "mom's spaghetti")
-
 
 		if message == self.last_message:
 			if user != self.last_user:
