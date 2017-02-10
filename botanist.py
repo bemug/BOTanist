@@ -56,6 +56,7 @@ class Bot(ircbot.SingleServerIRCBot):
 	VF_RQ_TIMELAPSE = 5
 	items = {'slap': 1, 'kick': 50}
 	users_items = {}
+	forbiden_words = []
 
 	def start_vf(self, serv):
 		if len(self.players) > 1:
@@ -132,6 +133,12 @@ class Bot(ircbot.SingleServerIRCBot):
 		#print str(self.vf_w_mode) + str(self.vf_q_mode) + str(self.vf_n_mode)
 		message = ev.arguments()[0].decode('utf8')
 		user = irclib.nm_to_n(ev.source())
+		
+		#Check that you can say that
+		for i, word in enumerate(self.forbiden_words):
+			if word in message.lower():
+				print "Kick "+user+" for "+word
+				serv.kick(self.chan, user, 'Ne mentionne pas ce mot sur ce chan pauvre fou')
 
 		if self.vf_q_mode:
 			if remove_accents(message.lower()) == remove_accents(self.vf_answer.lower()):
