@@ -317,7 +317,7 @@ class Bot(ircbot.SingleServerIRCBot):
 			else:
 				serv.privmsg(self.chan, "Je n'écoute que mon maitre, sale péon".decode("utf8"))
 		if message.startswith("!money "):
-			self.money = message[7:30].decode("utf8")
+			self.money = message[7:30]
 			serv.privmsg(self.chan, "Changement de monnaie, On paie en "+self.money+" maintenant.")
 		if "!github" == message:
 			serv.privmsg(self.chan, "https://github.com/bemug/BOTanist")
