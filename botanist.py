@@ -33,6 +33,7 @@ def is_a_voyel(input_str):
 class Bot(ircbot.SingleServerIRCBot):
 	chan = "#contreloutre"
 	name = "BOTanist"
+	master = "Zoologist"
 	money = "pokétunes".decode("utf8")
 	cpt_last_message = 0
 	last_message = ""
@@ -302,7 +303,10 @@ class Bot(ircbot.SingleServerIRCBot):
 			for i in self.jokes:
 				serv.privmsg(self.chan, "_"+i+": "+str(self.jokes[i])+" "+self.money)
 		if "!suicide" == message:
-			serv.privmsg(self.chan, "Ô monde cruel!")
+			if user == self.master:
+				serv.privmsg(self.chan, "Ô monde cruel!")
+			else:
+				serv.privmsg(self.chan, "Je n'écoute que mon maitre, sale péon".decode("utf8"))
 		if message.startswith("!money "):
 			self.money = message[7:30].decode("utf8")
 			serv.privmsg(self.chan, "Changement de monnaie, On paie en "+self.money+" maintenant.")
