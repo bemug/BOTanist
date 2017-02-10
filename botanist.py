@@ -216,6 +216,7 @@ class Bot(ircbot.SingleServerIRCBot):
 		if "!song" == message or "song?" == message:
 			print "Song asked by "+user
 			serv.privmsg(self.chan, "Darude - Sandstorm")
+			serv.privmsg(self.chan, "https://goo.gl/uGvNCD")
 		if self.name in message or "bot" in message:
 			if "ty "+self.name in message:
 				print "np "+user
