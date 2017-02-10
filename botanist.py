@@ -63,8 +63,8 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "Debut de la partie! ("+", ".join(self.players)+")")
 			self.vf_rq_need = len(self.players)
 			self.vf_w_mode = False
-			self.vf_q_mode = True
 			time.sleep(2)
+			self.vf_q_mode = True
 			self.say_question(serv)
 		elif len(self.players) == 1:
 			serv.privmsg(self.chan, "Lol y a personne pour jouer avec toi "+self.players[0]+".")
@@ -186,6 +186,7 @@ class Bot(ircbot.SingleServerIRCBot):
 								pickle.dump(self.jokes, f, 0)
 							serv.mode(self.chan, "-v "+self.players[0])
 							self.players = []
+							self.question = ""
 							serv.privmsg(self.chan, "Partie terminée :)".decode("utf8"))
 						else:
 							self.vf_q_mode = True
