@@ -142,6 +142,8 @@ class Bot(ircbot.SingleServerIRCBot):
 				final_winner = ""
 		if final_winner != "":
 			serv.privmsg(self.chan, "** Gagnant: " + player + " avec " + str(points) + " points")
+			serv.privmsg(self.chan, "!togglecollect")
+				
 			# reset
 			self.dcdl_tirage = ""
 			self.dcdl_answers = {}
@@ -364,6 +366,7 @@ class Bot(ircbot.SingleServerIRCBot):
 						serv.privmsg(self.chan, message + " il est pas voice, tocard. Prends en un autre")
 		elif self.dcdl_mode == 0:
 			if message == "!deslettresetdeslettres":
+				serv.privmsg(self.chan, "!togglecollect")
 				self.dcdl_begin(serv)
 
 		elif self.dcdl_mode == 1:	# letter selection
