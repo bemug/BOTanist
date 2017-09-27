@@ -56,12 +56,16 @@ class Bot(ircbot.SingleServerIRCBot):
 	insults = open('insults.txt').read().splitlines()
 	users = []
 	players = []
+	players_ez = []
 	stats ={}
 	jokes ={}
 	total_msg = 0
+	vf_global_mode = False
 	vf_q_mode = False
 	vf_n_mode = False
 	vf_w_mode = False
+	vf_ez_mode = False
+	vf_ez_ans_mode = False
 	vf_answer = ""
 	vf_question = ""
 	vf_winner = ""
@@ -160,11 +164,12 @@ class Bot(ircbot.SingleServerIRCBot):
 
 	def start_vf(self, serv):
 		if len(self.players) > 1:
+			self.vf_global_mode = True
 			serv.privmsg(self.chan, "!togglecollect")
 			serv.privmsg(self.chan, "Debut de la partie! ("+", ".join(self.players)+")")
 			self.vf_rq_need = len(self.players)
-			self.vf_w_mode = False
 			time.sleep(2)
+			self.vf_w_mode = False
 			self.vf_q_mode = True
 			self.say_question(serv)
 		elif len(self.players) == 1:
@@ -182,15 +187,27 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, ("T'es déjà dans la liste "+user).decode("utf8"))
 
 	def say_question(self, serv):
+		self.vf_rq_cpt = 0
 		print "Question! "+str(self.vf_w_mode) + str(self.vf_q_mode) + str(self.vf_n_mode)
 		randf = random.choice(os.listdir("questions/"))
 		f = open("questions/"+randf, 'r').read().splitlines()
 		line = random.choice(f).decode("utf-8")
 		self.vf_question = line.split("|")[0]
 		self.vf_answer = line.split("|")[1]
-		serv.privmsg(self.chan, self.vf_question)
+		serv.privmsg(self.chan, "** "+self.vf_question)
 		self.vf_rq_time = time.time()
 		print self.players
+
+	def vf_victory(self, serv):
+		serv.privmsg(self.chan, "GG "+self.players[0]+". Voila tes " + str(self.vf_rq_need-1) + " " + self.money+". Partie terminée :)".decode("utf8"))
+		self.jokes[self.players[0]] = self.jokes[self.players[0]] + self.vf_rq_need-1
+		with open('jokes.txt', 'w') as f:
+			pickle.dump(self.jokes, f, 0)
+		serv.mode(self.chan, "-v "+self.players[0])
+		self.players = []
+		self.question = ""
+		serv.privmsg(self.chan, "!togglecollect")
+		self.vf_global_mode = False
 
 	def __init__(self):
 		#Load shit
@@ -227,6 +244,10 @@ class Bot(ircbot.SingleServerIRCBot):
 	def on_quit(self, serv, ev):
 		user = irclib.nm_to_n(ev.source())
 		print "Quit "+user
+		if self.vf_global_mode == True:
+			if user in self.players: self.players.remove(user)
+			self.players_ez.remove(user)
+			serv.privmsg(self.chan, u"Quelle tarlouze ce "+user)
 		self.users.remove(user)
 
 
@@ -271,6 +292,58 @@ class Bot(ircbot.SingleServerIRCBot):
 				else:
 					time_left = '%.2f' % float(self.vf_rq_time + self.VF_RQ_TIMELAPSE - time.time())
 					serv.privmsg(self.chan, time_left + " sec avant de pouvoir !rq")
+			elif "!ez" == message:
+				if not user in self.players:
+					serv.privmsg(self.chan, u"Tu dois être voice pour prendre ce risque "+user)
+				else:
+					self.vf_q_mode = False
+					serv.privmsg(self.chan, user+u"_ sait")
+					self.players_ez.append(user)
+					self.vf_ez_mode = True
+
+		elif self.vf_ez_mode:
+			if "!ez" == message:
+				if not user in self.players:
+					serv.privmsg(self.chan, u"Tu dois être voice pour prendre ce risque "+user)
+				else:
+					self.players_ez.append(user)
+					if len(self.players_ez) == len(self.players):
+						serv.privmsg(self.chan, "Tout le monde sait, on passe")
+						self.vf_ez_mode = False
+						self.players_ez = []
+						time.sleep(2)
+						self.vf_q_mode = True
+						self.say_question(serv)
+					else:
+						serv.privmsg(self.chan, user+u"_ sait aussi")
+			elif "!bluf" == message:
+				self.vf_ez_mode = False
+				self.vf_ez_ans_mode = True
+				serv.privmsg(self.chan, u"Alors c'est quoi la réponse "+self.players_ez[0]+" ?")
+				
+		elif self.vf_ez_ans_mode:
+			if user == self.players_ez[0]:
+				self.players_ez = []
+				if remove_accents(message.lower()) == remove_accents(self.vf_answer.lower()):
+					serv.privmsg(self.chan, u"Ca va, prend 1 "+self.money+" et zigouille un mec")
+					self.jokes[user] = self.jokes[user] + 1
+					with open('jokes.txt', 'w') as f:
+						pickle.dump(self.jokes, f, 0)
+					self.vf_ez_ans_mode = False
+					self.vf_winner = user
+					self.vf_n_mode = True
+				else:
+					serv.privmsg(self.chan, u"Ta gueule, c'était '"+self.vf_answer+"'")
+					serv.mode(self.chan, "-v "+user)
+					self.players.remove(user)
+					self.vf_ez_ans_mode = False
+					if len(self.players) == 1:
+						self.vf_victory(serv)
+					else:
+						time.sleep(2)
+						self.vf_q_mode = True
+						self.say_question(serv)
+
 
 		elif self.vf_n_mode:
 			if user == self.vf_winner:
@@ -279,17 +352,10 @@ class Bot(ircbot.SingleServerIRCBot):
 						self.vf_n_mode = False
 						serv.mode(self.chan, "-v "+message)
 						self.players.remove(message)
+						self.players_ez = []
 						if len(self.players) == 1:
 							self.vf_q_mode = False
-							serv.privmsg(self.chan, "GG "+self.players[0]+". Voila tes " + str(self.vf_rq_need-1) + " " + self.money+".")
-							self.jokes[self.players[0]] = self.jokes[self.players[0]] + self.vf_rq_need-1
-							with open('jokes.txt', 'w') as f:
-								pickle.dump(self.jokes, f, 0)
-							serv.mode(self.chan, "-v "+self.players[0])
-							self.players = []
-							self.question = ""
-							serv.privmsg(self.chan, "Partie terminée :)".decode("utf8"))
-							serv.privmsg(self.chan, "!togglecollect")
+							self.vf_victory(serv)
 						else:
 							self.vf_q_mode = True
 							time.sleep(2)
