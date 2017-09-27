@@ -496,9 +496,8 @@ class Bot(ircbot.SingleServerIRCBot):
 		if "feu".decode("utf8") in message.lower():
 			serv.privmsg(self.chan, "CHUI CHAUD CHUI CHAUUUUUUUUD")
 		if "!stat" == message.lower():
-			for i in self.stats:
-				stat = '%.2f' % (float(self.stats[i]) / float(self.total_msg) * 100.0)
-				serv.privmsg(self.chan, "_"+i+": "+stat+"%")
+			stat = '%.2f' % (float(self.stats[user]) / float(self.total_msg) * 100.0)
+			serv.privmsg(self.chan, user+": "+stat+"%")
 		if "!slap" == message:
 			serv.action(self.chan, "slaps "+random.choice(self.users))
 		if "!meme" == message:
