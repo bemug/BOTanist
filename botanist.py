@@ -11,6 +11,7 @@ import string
 import time
 import datetime
 import unicodedata
+import collections
 from threading import Timer
 from datetime import datetime
 from pytz import timezone
@@ -84,6 +85,7 @@ class Bot(ircbot.SingleServerIRCBot):
 	dcdl_tirage = ""
 	dcdl_answers = {}
 	dcdl_points = {}
+	hist = collections.deque(maxlen=10)
 
 
 
@@ -260,6 +262,10 @@ class Bot(ircbot.SingleServerIRCBot):
 		#print str(self.vf_w_mode) + str(self.vf_q_mode) + str(self.vf_n_mode)
 		message = ev.arguments()[0].decode('utf8')
 		user = irclib.nm_to_n(ev.source())
+
+		ts = time.time()
+		st = datetime.fromtimestamp(ts).strftime('%H:%M:%S.%f')
+		self.hist.append(st[:-4]+" "+user+"_: "+message)
 		
 		#Check that you can say that
 		for i, word in enumerate(self.forbiden_words):
@@ -560,6 +566,9 @@ class Bot(ircbot.SingleServerIRCBot):
 				serv.privmsg(self.chan, "YOU OTTERFUCKER https://goo.gl/WYdiop")
 
 
+		if "!arbitragevideo" == message.lower() or "!hist" == message.lower() or "!h" == message.lower():
+			for i in self.hist:
+				serv.privmsg(self.chan, i)
 
 		if message.lower().rstrip().endswith('age'):
 			if random.random() < 0.5:
