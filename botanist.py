@@ -47,8 +47,8 @@ def get_consonant():
 
 class Bot(ircbot.SingleServerIRCBot):
 	chan = "#contreloutre"
-	name = "BOTanist"
-	master = "Zoologist"
+	name = "lutralutra"
+	master = "zoologist"
 	money = "pokétunes".decode("utf8")
 	cpt_last_message = 0
 	last_message = ""
@@ -518,7 +518,7 @@ class Bot(ircbot.SingleServerIRCBot):
 				self.add_player(user, serv)
 
 		if "!stopvoicefaible" == message:
-			if user == "Zoologist":
+			if user == self.master:
 				print "Stop Vociefaible "+user
 				self.vf_q_mode = False
 				self.vf_n_mode = False
