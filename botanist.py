@@ -9,8 +9,11 @@ import os
 import pickle
 import string
 import time
+import datetime
 import unicodedata
 from threading import Timer
+from datetime import datetime
+from pytz import timezone
 
 def remove_accents(input_str):
 	nfkd_form = unicodedata.normalize('NFKD', input_str)
@@ -401,6 +404,8 @@ class Bot(ircbot.SingleServerIRCBot):
 			query = query.replace(" ", "+")
 			serv.privmsg(self.chan,
 					"http://www.google.com/search?&sourceid=navclient&btnI=I&q="+query)
+		if "!ping" == message:
+			serv.privmsg(self.chan, "pong "+user+" ("+st[:-4]+")")
 		if "!song" == message or "song?" == message:
 			print "Song asked by "+user
 			serv.privmsg(self.chan, "Darude - Sandstorm https://goo.gl/uGvNCD")
