@@ -403,8 +403,7 @@ class Bot(ircbot.SingleServerIRCBot):
 					"http://www.google.com/search?&sourceid=navclient&btnI=I&q="+query)
 		if "!song" == message or "song?" == message:
 			print "Song asked by "+user
-			serv.privmsg(self.chan, "Darude - Sandstorm")
-			serv.privmsg(self.chan, "https://goo.gl/uGvNCD")
+			serv.privmsg(self.chan, "Darude - Sandstorm https://goo.gl/uGvNCD")
 		if self.name in message or "bot" in message:
 			if "ty "+self.name in message:
 				print "np "+user
@@ -422,7 +421,7 @@ class Bot(ircbot.SingleServerIRCBot):
 		if "et ta soeur" in message:
 			print "Soeur pour "+user
 			serv.privmsg(self.chan, "elle bat le beurre")
-		if "story time" in message:
+		if "!storytime" == message or "!story" == message:
 			print "Story time "+user+"?"
 			serv.privmsg(self.chan, "story time?!" )
 			serv.privmsg(self.chan, " ___ _____ ___  _____   __  _____ ___ __  __ ___ " )
@@ -435,8 +434,7 @@ class Bot(ircbot.SingleServerIRCBot):
 		if "dead" in message or "ded" in message:
 			serv.privmsg(self.chan, "rip in couscous")
 		if "vallée".decode('utf8') in message.lower() or "vallee" in message.lower() or "tribu" in message.lower() or "dana" in message.lower():
-			serv.privmsg(self.chan, "DANS LA VALLEE OH OH DE DANA")
-			serv.privmsg(self.chan, "LALILALA")
+			serv.privmsg(self.chan, "DANS LA VALLEE OH OH DE DANA, LALILALA")
 		if "ls" == message:
 			serv.privmsg(self.chan, "wrong shell mofo")
 		if message.startswith("!rek"):
@@ -458,11 +456,15 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "( ͡° ͜ʖ ͡° )".decode("utf8"))
 		if message.startswith("!fu"):
 			serv.privmsg(self.chan, "( ° ͜ʖ͡°)╭∩╮".decode("utf8"))
+		if message.startswith("!fm") or message.startswith("!fightme"):
+			serv.privmsg(self.chan, "(ง ͠° ͟ل͜ ͡°)ง".decode("utf8"))
 		if message == "!sh" or message.startswith("!sf") or message.startswith("!shrug"):
 			serv.privmsg(self.chan, "¯\_(ツ)_/¯".decode("utf8"))
+		if message == "!f" or message == "!bow":
+			serv.privmsg(self.chan, "(シ_ _)シ".decode("utf8"))
 		if message.startswith("!badum"):
 			serv.privmsg(self.chan, "**BADUM TSSS** http://i.imgur.com/BbgL7x3.gif")
-		if "popopo" in message.lower() or "oooo" in message.lower():
+		if "popopo" in message.lower():
 			if random.random() < 0.5:
 				serv.privmsg(self.chan, "https://goo.gl/QZVh3H")
 				#http://i.imgur.com/WxQI4UI.jpg
@@ -511,20 +513,19 @@ class Bot(ircbot.SingleServerIRCBot):
 			else:
 				serv.privmsg(self.chan, "Je n'écoute que mon maitre, sale péon".decode("utf8"))
 		if message.startswith("!money "):
-			self.money = message[7:30]
+			self.money = message[7:128]
 			serv.privmsg(self.chan, "Changement de monnaie, On paie en "+self.money+" maintenant.")
 		if "!github" == message:
 			serv.privmsg(self.chan, "https://github.com/bemug/BOTanist")
 
 		if "pirate" in message.lower():
-			serv.privmsg(self.chan, "YOU ARE A PIRATE !")
-			serv.privmsg(self.chan, "http://cristgaming.com/pirate")
+			serv.privmsg(self.chan, "YOU ARE A PIRATE ! http://cristgaming.com/pirate")
 
 		if "canard" in message.lower():
 			serv.privmsg(self.chan, "COIN COIN MODAFUCKAH")
 
 		if "!racist" == message:
-			serv.privmsg(self.chan, "https://media.giphy.com/media/TziYd1ClxHmiQ/giphy.gif")
+			serv.privmsg(self.chan, "http://i.imgur.com/xV3sl.gif")
 
 		if message.startswith("!youtube ") or message.startswith("!y "):
 			if message.startswith("!y "):
@@ -533,7 +534,7 @@ class Bot(ircbot.SingleServerIRCBot):
 				query = message[9:100]
 			print "Youtube request from "+user+" for '"+query+"'"
 			query = query.replace(" ", "+")
-			serv.privmsg(self.chan,"https://www.youtube.com/results?search_query="+query)
+			serv.privmsg(self.chan,"https://www.google.fr/search?q=site%3Ayoutube.com+"+query+"&btnI=I")
 
 		if "chanson?" == message:
 			serv.privmsg(self.chan, "A CHAQUE CHANSON")
@@ -542,7 +543,9 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "FAUT Y METTRE SON CANON")
 
 		if "otter" in message.lower() or "loutre" in message.lower():
-			serv.privmsg(self.chan, "YOU OTTERFUCKER https://goo.gl/WYdiop")
+			if random.random() < 0.3:
+				serv.privmsg(self.chan, "YOU OTTERFUCKER https://goo.gl/WYdiop")
+
 
 
 		if message.lower().rstrip().endswith('age'):
@@ -598,13 +601,13 @@ class Bot(ircbot.SingleServerIRCBot):
 				self.players = []
 
 		#Random shit
-		if random.random() < 0.005:
+		if random.random() < 0.004:
 			serv.privmsg(self.chan, "me too thanks")
-		if random.random() < 0.005:
+		if random.random() < 0.004:
 			serv.privmsg(self.chan, "go startup?")
       
 		if message.endswith('i') and not is_a_voyel(message[:-1]):
-			if random.random() < 0.005:
+			if random.random() < 0.2:
 				serv.privmsg(self.chan, "mom's spaghetti")
 
 		if message == self.last_message:
