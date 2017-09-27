@@ -21,6 +21,13 @@ def remove_accents(input_str):
 	only_ascii = nfkd_form.encode('ASCII', 'ignore')
 	return only_ascii
 
+articles = ['de ', 'du ', 'le ', 'la ', 'les ', 'l\'' 'un ', 'une ', 'des ']
+def remove_articles(input_str):
+	for i in articles:
+		if input_str.startswith(i):
+			input_str = input_str[len(i):]
+	return input_str
+
 def is_last_voyel(voyel, input_str):
 	for cur_char in reversed(input_str):
 		if cur_char in ('a', 'e', 'i', 'o', 'u', 'y'):
@@ -275,7 +282,7 @@ class Bot(ircbot.SingleServerIRCBot):
 				serv.kick(self.chan, user, u'Comme ça tu vas bien ftg')
 
 		if self.vf_q_mode:
-			if remove_accents(message.lower()) == remove_accents(self.vf_answer.lower()):
+			if remove_accents(message.lower()) == remove_accents(self.vf_answer.lower()) or remove_accents(message.lower()) == remove_accents(remove_articles(self.vf_answer.lower())):
 				serv.privmsg(self.chan, "Correct "+user+" ! "+self.vf_answer+".")
 				self.vf_winner = user
 				if user not in self.players:
