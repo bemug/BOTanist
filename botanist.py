@@ -279,7 +279,7 @@ class Bot(ircbot.SingleServerIRCBot):
 					serv.privmsg(self.chan, "Qui c'est qu'on zigouille ?")
 				self.vf_rq_cpt = 0
 			elif "!question" == message or "!q" == message:
-				serv.privmsg(self.chan, self.vf_question)
+				serv.privmsg(self.chan, "** "+self.vf_question)
 			elif "!rq" == message:
 				if self.vf_rq_time + self.VF_RQ_TIMELAPSE < time.time():
 					self.vf_rq_cpt+=1
