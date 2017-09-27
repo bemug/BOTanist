@@ -77,7 +77,7 @@ class Bot(ircbot.SingleServerIRCBot):
 	vf_rq_need = 0
 	vf_rq_time = 0
 	VF_RQ_TIMELAPSE = 5
-	items = {'slap': 1, 'kick': 50}
+	items = {'slap': 1, 'barbapapa': 2, 'kick': 50}
 	users_items = {}
   	forbiden_words = []
 	dcdl_mode = 0	# 0: not playing, 1: selection, 2: reflection time, 3: answer time
@@ -593,6 +593,8 @@ class Bot(ircbot.SingleServerIRCBot):
 						elif i == 'kick':
 							if not self.vf_n_mode and not self.vf_q_mode and not self.vf_w_mode:
 								serv.kick(self.chan, message[10:100], 'Quelqu\'un a payé pour ça'.decode('utf8'))
+						elif i == 'barbapapa':
+							serv.action(self.chan, u"donne de la barbapapa à "+message[15:100]) #todo check user lol
 						with open('jokes.txt', 'w') as f:
 							pickle.dump(self.jokes, f, 0)
 					else:
