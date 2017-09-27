@@ -489,6 +489,14 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.action(self.chan, "slaps "+random.choice(self.users))
 		if "!meme" == message:
 			serv.privmsg(self.chan, "https://imgflip.com/memegenerator")
+		if "!renard" == message or "!fox" == message:
+			serv.privmsg(self.chan, "https://goo.gl/Cb7f8d")
+		if "!fb" == message or "!facebook" == message:
+			serv.privmsg(self.chan, "https://i.redd.it/nnlm8zbnydmy.jpg")
+		if "!wm" == message or "!watermelon" == message:
+			serv.privmsg(self.chan, "http://i.imgur.com/sTUyI.gif")
+		if "!fetch" == message:
+			serv.privmsg(self.chan, "http://i.imgur.com/PqZSzMr.gifv")
 		if message.startswith("!n ") or message.startswith("!nice "):
 			if message.startswith("!n "):
 				target = message[3:100]
