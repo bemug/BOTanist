@@ -271,7 +271,8 @@ class Bot(ircbot.SingleServerIRCBot):
 		for i, word in enumerate(self.forbiden_words):
 			if word in message.lower():
 				print "Kick "+user+" for "+word
-				serv.kick(self.chan, user, 'Ne mentionne pas ce mot sur ce chan pauvre fou')
+				serv.privmsg(self.chan, "Mais ftg "+user)
+				serv.kick(self.chan, user, u'Comme ça tu vas bien ftg')
 
 		if self.vf_q_mode:
 			if remove_accents(message.lower()) == remove_accents(self.vf_answer.lower()):
