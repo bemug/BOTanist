@@ -125,14 +125,14 @@ class Bot(ircbot.SingleServerIRCBot):
 					winners.append(player)
 		serv.privmsg(self.chan, "Gagnant-e-(s): ")
 		for winner in winners:
-			serv.privmsg(self.chan, winner + ", + " + str(points) + " points")
 			if winner in self.dcdl_points:
 				self.dcdl_points[winner] += points
 			else:
 				self.dcdl_points[winner] = points
+			serv.privmsg(self.chan, winner + ", + " + str(points) + " points ("+str(self.dcdl_points[winner])+" points)")
 		# check for end-of-game
 		final_winner = ""
-		final_winner_points = 40
+		final_winner_points = 20
 		for player, points in self.dcdl_points.iteritems():
 			if points > final_winner_points:
 				final_winner_points = points
