@@ -502,6 +502,8 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.action(self.chan, "slaps "+random.choice(self.users))
 		if "!meme" == message:
 			serv.privmsg(self.chan, "https://imgflip.com/memegenerator")
+		if "!draw" == message:
+			serv.privmsg(self.chan, "http://sketchtoy.com")
 		if "!renard" == message or "!fox" == message:
 			serv.privmsg(self.chan, "https://goo.gl/Cb7f8d")
 		if "!fb" == message or "!facebook" == message:
