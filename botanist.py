@@ -450,8 +450,11 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "https://goo.gl/k9VQkP")
 			for i in self.users:
 				serv.action(self.chan, "gives popcorn to "+i)
-		if "dead" in message or "ded" in message:
-			serv.privmsg(self.chan, "rip in couscous")
+		if "dead inside" in message or "ded inside" in message:
+			serv.privmsg(self.chan, "https://goo.gl/ORpTi1")
+		elif "dead" in message or "ded" in message:
+			if random.random() < 0.5:
+				serv.privmsg(self.chan, "rip in pepperonis")
 		if "vallée".decode('utf8') in message.lower() or "vallee" in message.lower() or "tribu" in message.lower() or "dana" in message.lower():
 			serv.privmsg(self.chan, "DANS LA VALLEE OH OH DE DANA, LALILALA")
 		if "ls" == message:
@@ -463,8 +466,6 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "☑ Tyrannosaurus Rekt".decode("utf8"))
 		if "thatsthejoke" in message:
 			serv.privmsg(self.chan, "http://i.imgur.com/U7Ghu2s.jpg")
-		if "dead inside" in message:
-			serv.privmsg(self.chan, "https://goo.gl/ORpTi1")
 		if message.startswith("!tf") or message.startswith("!tableflip"):
 			serv.privmsg(self.chan, "(╯°□°）╯︵ ┻━┻".decode("utf8"))
 		if message.startswith("!ft") or message.startswith("!fliptable"):
