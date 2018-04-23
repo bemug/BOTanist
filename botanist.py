@@ -511,6 +511,8 @@ class Bot(ircbot.SingleServerIRCBot):
 			serv.privmsg(self.chan, "https://i.redd.it/nnlm8zbnydmy.jpg")
 		if "!wm" == message or "!watermelon" == message:
 			serv.privmsg(self.chan, "http://i.imgur.com/sTUyI.gif")
+		if "!bonk" == message:
+			serv.privmsg(self.chan, "https://imgur.com/rsbVbWV")
 		if "!fetch" == message:
 			serv.privmsg(self.chan, "http://i.imgur.com/PqZSzMr.gifv")
 		if "!time" == message:
