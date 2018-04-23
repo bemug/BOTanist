@@ -644,6 +644,9 @@ class Bot(ircbot.SingleServerIRCBot):
 					serv.mode(self.chan, "-v "+i)
 				self.players = []
 
+		if message.startswith("!topic "):
+			serv.topic(self.chan, message[7:256])
+
 		#Random shit
 		if random.random() < 0.004:
 			serv.privmsg(self.chan, "me too thanks")
