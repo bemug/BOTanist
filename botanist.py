@@ -519,10 +519,10 @@ class Bot(ircbot.SingleServerIRCBot):
 			paris = timezone('Europe/Paris')
 			lo_time = datetime.now(paris)
 			lo_time = lo_time.strftime('%d-%m %H:%M:%S')
-			singapore = timezone('Asia/Singapore')
-			si_time = datetime.now(singapore)
-			si_time = si_time.strftime('%H:%M:%S')
-			serv.privmsg(self.chan, lo_time + " (Singapour: " + si_time +")")
+			tokyo = timezone('Asia/Tokyo')
+			tk_time = datetime.now(tokyo)
+			tk_time = tk_time.strftime('%H:%M:%S')
+			serv.privmsg(self.chan, lo_time + " (Tokyo: " + tk_time +")")
 		if message.startswith("!n ") or message.startswith("!nice "):
 			if message.startswith("!n "):
 				target = message[3:100]
