@@ -60,7 +60,7 @@ class Bot(ircbot.SingleServerIRCBot):
 	chan = "#contreloutre"
 	name = "lutralutra"
 	master = "zoologist"
-	money = "pokétunes".decode("utf8")
+	money = "internet points".decode("utf8")
 	cpt_last_message = 0
 	last_message = ""
 	last_user = ""
