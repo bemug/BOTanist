@@ -647,6 +647,11 @@ class Bot(ircbot.SingleServerIRCBot):
 		if message.startswith("!topic "):
 			serv.topic(self.chan, message[7:256])
 
+                #Fuck this bot
+                if message == "!feature ElSpanishRigolator off".lower():
+			serv.privmsg(self.chan, "Nobody expects the SPANISH INQUISITION!")
+			serv.privmsg(self.chan, "!feature ElSpanishRigolator on")
+                        serv.privmsg(self.chan, "Jajaja")
 		#Random shit
 		if random.random() < 0.004:
 			serv.privmsg(self.chan, "me too thanks")
