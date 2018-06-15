@@ -415,7 +415,7 @@ class Bot(ircbot.SingleServerIRCBot):
 			elif message.startswith("!google "):
 				query = message[8:100]
 			print "Google request from "+user+" for '"+query+"'"
-			query = query.replace(" ", "+")
+                        query = query.replace(" ", "+").decode("utf8")
 			serv.privmsg(self.chan,
 					"http://www.google.com/search?&sourceid=navclient&btnI=I&q="+query)
 		if "!ping" == message:
